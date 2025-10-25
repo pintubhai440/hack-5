@@ -1,136 +1,139 @@
-'use client'; 
+'use client';
 
-import React, { useState } from 'react';
+import { useState, useTransition } from 'react';
+// YEH AAPKA BACKEND FUNCTION HAI
+import { suggestRelevantVideos } from '@/ai/flows/suggest-relevant-videos';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, ExternalLinkIcon } from 'lucide-react'; // ExternalLinkIcon ko import karein
 
-// This is the SVG for the "open in new tab" icon seen in your screenshot
-const ExternalLinkIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className="w-5 h-5 text-gray-500 hover:text-blue-600"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-    />
-  </svg>
-);
+// NAYA TYPE: Ab hum 'searchQueries' expect kar rahe hain
+type Recommendations = {
+  searchQueries: string[];
+};
 
 export default function RecommendationsPage() {
-  // We use 'useState' to manage the text in the boxes
-  // I've pre-filled them to match your screenshot
-  const [profile, setProfile] = useState('20 year old man');
-  const [goal, setGoal] = useState('muscular');
+  const [userProfile, setUserProfile] = useState('');
+  const [fitnessGoals, setFitnessGoals] = useState('');
+  // NAYA STATE: State ko naye type 'Recommendations' se update kiya
+  const [recommendations, setRecommendations] = useState<Recommendations | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
 
-  // Static list of recommendations, just like in the screenshot
-  // In a real app, you would fetch these based on the profile and goal
-  const recommendations = [
-    {
-      title: 'science based workout for muscle growth',
-      url: 'https://www.youtube.com/results?search_query=science+based+workout+for+muscle+growth',
-    },
-    {
-      title: 'push pull legs split for mass',
-      url: 'https://www.youtube.com/results?search_query=push+pull+legs+split+for+mass',
-    },
-    {
-      title: 'high protein meal plan for building muscle',
-      url: 'https://www.youtube.com/results?search_query=high+protein+meal+plan+for+building+muscle',
-    },
-  ];
+  const handleGetRecommendations = () => {
+    if (!userProfile || !fitnessGoals) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing information',
+        description: 'Please fill out your profile and fitness goals.',
+      });
+      return;
+    }
 
-  // This function runs when you click the button
-  const handleGetRecommendations = (e) => {
-    e.preventDefault(); // Prevents the page from reloading
-    console.log('Fetching recommendations for:', { profile, goal });
-    // Add your AI/API call here to get new recommendations
+    startTransition(async () => {
+      try {
+        const result = await suggestRelevantVideos({
+          userProfile,
+          fitnessGoals,
+        });
+        
+        // YEH NAYI LINE ADD KAREIN (Testing ke liye)
+        console.log("AI SE YEH RESULT AAYA:", result); 
+        
+        // NAYA RESULT: Hum 'result' ko 'Recommendations' type mein set kar rahe hain
+        setRecommendations(result as Recommendations);
+      } catch (error) {
+        console.error('Failed to get recommendations:', error);
+        toast({
+          variant: 'destructive',
+          title: 'Failed to get recommendations',
+          description: 'There was an error. Please try again.',
+        });
+      }
+    });
   };
 
   return (
-    // Main content area with a light blue background (bg-sky-50)
-    <div className="flex-1 p-8 bg-sky-50 min-h-screen overflow-y-auto">
-      
-      {/* Constrain the width to match the centered look in the image */}
-      <div className="max-w-3xl">
-
-        {/* --- Get Recommendations Section --- */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-semibold mb-2 text-gray-800">
-            Get Recommendations
-          </h2>
-          <p className="text-gray-600 mb-4">
+    // Is HTML/JSX mein koi badlaav nahi hai
+    <div className="container mx-auto max-w-3xl">
+      <Card>
+        <CardHeader>
+          <CardTitle>Get Recommendations</CardTitle>
+          <CardDescription>
             Describe your profile and goals to get video recommendations.
-          </p>
-          
-          <form onSubmit={handleGetRecommendations} className="space-y-4">
-            {/* Textarea 1: Styled with bg-sky-100 as in the image */}
-            <textarea
-              className="w-full p-4 border-0 rounded-lg bg-sky-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
-              rows="3"
-              value={profile}
-              onChange={(e) => setProfile(e.target.value)}
-              placeholder="e.g., 20 year old man"
-            ></textarea>
-            
-            {/* Textarea 2: Styled with bg-sky-100 as in the image */}
-            <textarea
-              className="w-full p-4 border-0 rounded-lg bg-sky-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
-              rows="3"
-              value={goal}
-              onChange={(e) => setGoal(e.target.value)}
-              placeholder="e.g., muscular, weight loss"
-            ></textarea>
-            
-            {/* The blue button */}
-            <button
-              type="submit"
-              className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-            >
-              Get Recommendations
-            </button>
-          </form>
-        </div>
-
-        {/* --- Recommended For You Section --- */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800">
-            Recommended For You
-          </h2>
-          <div className="space-y-3">
-            {recommendations.map((rec, index) => (
-              <div
-                key={index}
-                // Each recommendation is a white card with a shadow
-                className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex justify-between items-center"
-              >
-                {/* The blue link */}
-                <a
-                  href={rec.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline font-medium capitalize text-sm"
-                >
-                  {rec.title}
-                </a>
-                {/* The icon on the right */}
-                <a
-                  href={rec.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ml-4 flex-shrink-0"
-                >
-                  <ExternalLinkIcon />
-                </a>
-              </div>
-            ))}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-6">
+          <div className="grid gap-2">
+            <Textarea
+              placeholder="e.g., a 20 year old man, I want muscular body"
+              value={userProfile}
+              onChange={(e) => setUserProfile(e.target.value)}
+            />
           </div>
-        </div>
+          <div className="grid gap-2">
+            <Textarea
+              placeholder="e.g., six pack, muscular"
+              value={fitnessGoals}
+              onChange={(e) => setFitnessGoals(e.target.value)}
+            />
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button onClick={handleGetRecommendations} disabled={isPending}>
+            {isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Getting Recommendations...
+              </>
+            ) : (
+              'Get Recommendations'
+            )}
+          </Button>
+        </CardFooter>
+      </Card>
 
-      </div>
+      {/* YEH HISSA BADAL GAYA HAI */}
+      {recommendations && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Recommended For You</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-3">
+            {/* NAYA MAPPING: Ab hum 'searchQueries' par loop kar rahe hain */}
+            {recommendations.searchQueries.map((query, index) => {
+              // NAYA LINK: Hum har query ke liye ek asli YouTube SEARCH link bana rahe hain
+              const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(
+                query
+              )}`;
+
+              return (
+                <a
+                  // NAYA URL: 'href' mein ab 'searchUrl' jaayega
+                  href={searchUrl}
+                  key={index}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between rounded-lg border bg-card p-3 transition-colors hover:bg-muted"
+                >
+                  {/* NAYA TEXT: Link ki jagah ab 'query' text dikhega */}
+                  <span className="truncate text-sm text-primary">{query}</span>
+                  <ExternalLinkIcon className="h-4 w-4 text-muted-foreground" />
+                </a>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

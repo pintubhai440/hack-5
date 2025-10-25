@@ -43,7 +43,7 @@ const analyzeExerciseVideoPrompt = ai.definePrompt({
 2.  **Repetition Counting:**
     *   Carefully analyze the video frame-by-frame.
     *   Count only **full, completed repetitions** based on the criteria below.
-    *   **Push-up:** A full rep involves lowering the body until the chest is close to the floor and then pushing back up to the starting position with arms fully extended.
+    * **Push-up:** A full rep involves lowering the body by bending the elbows significantly (to at least 90 degrees) and then pushing back up until the arms are nearly straight.
     *   **Squat:** A full rep involves lowering the hips until the thighs are at least parallel to the floor, then returning to a standing position.
     *   **Pull-up:** A full rep starts from a full hang, pulling the body up until the chin is over the bar, and then lowering back to a full hang.
     *   **Lunge:** A full rep involves stepping forward or backward, lowering both knees to approximately 90-degree angles, and returning to the starting position. One leg movement counts as one rep.

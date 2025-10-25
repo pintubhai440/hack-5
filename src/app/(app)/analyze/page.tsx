@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useTransition } from 'react';
+// YEH AAPKA UPDATED BACKEND FUNCTION HAI
 import { analyzeExerciseVideo } from '@/ai/flows/analyze-exercise-video';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,8 +22,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Upload, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 
+// Analysis result ka type same rahega
 type AnalysisResult = {
   repetitionCount: number;
   formFeedback?: string;
@@ -32,7 +34,9 @@ export default function AnalyzeVideoPage() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const [exerciseType, setExerciseType] = useState<string>('');
-  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(
+    null
+  );
   const [isPending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -48,34 +52,41 @@ export default function AnalyzeVideoPage() {
         });
         return;
       }
-      setVideoFile(file);
-      setAnalysisResult(null);
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const videoElement = document.createElement('video');
-        videoElement.src = reader.result as string;
-        videoElement.onloadedmetadata = () => {
-          if (videoElement.duration > 45) {
-            toast({
-              variant: "destructive",
-              title: "Video too long",
-              description: "Please upload a video with a maximum duration of 45 seconds.",
-            });
-            setVideoFile(null);
-            setVideoPreview(null);
-            if(fileInputRef.current) fileInputRef.current.value = "";
-          } else {
-            setVideoPreview(reader.result as string);
+      setAnalysisResult(null); // Purana result clear karo
+
+      // Video duration check karne ke liye
+      const videoElement = document.createElement('video');
+      videoElement.preload = 'metadata';
+
+      videoElement.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(videoElement.src); // Memory release karo
+        if (videoElement.duration > 45) {
+          toast({
+            variant: "destructive",
+            title: "Video too long",
+            description: "Please upload a video with a maximum duration of 45 seconds.",
+          });
+          setVideoFile(null);
+          setVideoPreview(null);
+          if (fileInputRef.current) fileInputRef.current.value = "";
+        } else {
+          // Sab theek hai, file aur preview set karo
+          setVideoFile(file);
+          // Purana preview clear karo (agar ho toh)
+          if (videoPreview) {
+            URL.revokeObjectURL(videoPreview);
           }
-        };
+          setVideoPreview(URL.createObjectURL(file)); // Data URI ki jagah Object URL use karein
+        }
       };
-      reader.readAsDataURL(file);
+      
+      videoElement.src = URL.createObjectURL(file);
     }
   };
 
   const handleAnalyze = () => {
-    if (!videoFile || !videoPreview || !exerciseType) {
+    if (!videoFile || !exerciseType) {
       toast({
         variant: "destructive",
         title: "Missing information",
@@ -86,11 +97,17 @@ export default function AnalyzeVideoPage() {
 
     startTransition(async () => {
       try {
-        const result = await analyzeExerciseVideo({
-          videoDataUri: videoPreview,
-          exerciseType: exerciseType,
-        });
+        // *** YEH HISSA BADAL GAYA HAI ***
+        // Ab hum FormData bhej rahe hain, naaki JSON object
+        const formData = new FormData();
+        formData.append('videoFile', videoFile);
+        formData.append('exerciseType', exerciseType);
+
+        // Server action ko 'formData' parcel bhej rahe hain
+        const result = await analyzeExerciseVideo(formData);
+        
         setAnalysisResult(result);
+
       } catch (error) {
         console.error("Analysis failed:", error);
         toast({
@@ -103,6 +120,7 @@ export default function AnalyzeVideoPage() {
   };
 
   return (
+    // Aapka JSX (HTML) bilkul same rahega, usmein koi change nahi hai
     <div className="container mx-auto max-w-3xl">
       <Card>
         <CardHeader>
@@ -173,8 +191,8 @@ export default function AnalyzeVideoPage() {
               <div>
                 <h4 className="font-semibold mb-2">Form Feedback</h4>
                 <div className="flex items-start gap-4 rounded-lg border bg-card p-4">
-                   <AlertTriangle className="h-5 w-5 text-amber-500 mt-1" />
-                   <p className="text-sm text-muted-foreground">{analysisResult.formFeedback}</p>
+                    <AlertTriangle className="h-5 w-5 text-amber-500 mt-1" />
+                    <p className="text-sm text-muted-foreground">{analysisResult.formFeedback}</p>
                 </div>
               </div>
             )}

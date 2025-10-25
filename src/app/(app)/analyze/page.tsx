@@ -1,8 +1,9 @@
+// File: app/analyze/page.tsx
+
 'use client';
 
 import { useState, useRef, useTransition } from 'react';
-// YEH AAPKA UPDATED BACKEND FUNCTION HAI
-import { analyzeExerciseVideo } from '@/ai/flows/analyze-exercise-video';
+// import { analyzeExerciseVideo } from '@/ai/flows/analyze-exercise-video'; // <-- Ise HATA dein
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -24,7 +25,6 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 
-// Analysis result ka type same rahega
 type AnalysisResult = {
   repetitionCount: number;
   formFeedback?: string;
@@ -46,38 +46,35 @@ export default function AnalyzeVideoPage() {
     if (file) {
       if (file.size > 50 * 1024 * 1024) { // 50MB limit
         toast({
-          variant: "destructive",
-          title: "File too large",
-          description: "Please upload a video smaller than 50MB.",
+          variant: 'destructive',
+          title: 'File too large',
+          description: 'Please upload a video smaller than 50MB.',
         });
         return;
       }
 
-      setAnalysisResult(null); // Purana result clear karo
+      setAnalysisResult(null); 
 
-      // Video duration check karne ke liye
       const videoElement = document.createElement('video');
       videoElement.preload = 'metadata';
 
       videoElement.onloadedmetadata = () => {
-        window.URL.revokeObjectURL(videoElement.src); // Memory release karo
+        window.URL.revokeObjectURL(videoElement.src); 
         if (videoElement.duration > 45) {
           toast({
-            variant: "destructive",
-            title: "Video too long",
-            description: "Please upload a video with a maximum duration of 45 seconds.",
+            variant: 'destructive',
+            title: 'Video too long',
+            description: 'Please upload a video with a maximum duration of 45 seconds.',
           });
           setVideoFile(null);
           setVideoPreview(null);
-          if (fileInputRef.current) fileInputRef.current.value = "";
+          if (fileInputRef.current) fileInputRef.current.value = '';
         } else {
-          // Sab theek hai, file aur preview set karo
           setVideoFile(file);
-          // Purana preview clear karo (agar ho toh)
           if (videoPreview) {
             URL.revokeObjectURL(videoPreview);
           }
-          setVideoPreview(URL.createObjectURL(file)); // Data URI ki jagah Object URL use karein
+          setVideoPreview(URL.createObjectURL(file)); 
         }
       };
       
@@ -85,42 +82,54 @@ export default function AnalyzeVideoPage() {
     }
   };
 
+  // *** YEH FUNCTION POORA BADAL GAYA HAI ***
   const handleAnalyze = () => {
     if (!videoFile || !exerciseType) {
       toast({
-        variant: "destructive",
-        title: "Missing information",
-        description: "Please upload a video and select an exercise type.",
+        variant: 'destructive',
+        title: 'Missing information',
+        description: 'Please upload a video and select an exercise type.',
       });
       return;
     }
 
     startTransition(async () => {
       try {
-        // *** YEH HISSA BADAL GAYA HAI ***
-        // Ab hum FormData bhej rahe hain, naaki JSON object
+        // Step 1: Naya FormData "parcel" banayein
         const formData = new FormData();
         formData.append('videoFile', videoFile);
         formData.append('exerciseType', exerciseType);
 
-        // Server action ko 'formData' parcel bhej rahe hain
-        const result = await analyzeExerciseVideo(formData);
+        // Step 2: Server action ki jagah naye API route ko FETCH karein
+        const response = await fetch('/api/analyze-video', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          // Agar server ne error bheja, toh use dikhayein
+          throw new Error(result.error || 'Unknown error');
+        }
         
-        setAnalysisResult(result);
+        // Step 3: Result ko state mein set karein
+        setAnalysisResult(result as AnalysisResult);
 
       } catch (error) {
-        console.error("Analysis failed:", error);
+        console.error('Analysis failed:', error);
         toast({
-          variant: "destructive",
-          title: "Analysis Failed",
-          description: "There was an error analyzing your video. Please try again.",
+          variant: 'destructive',
+          title: 'Analysis Failed',
+          description: (error as Error).message || 'There was an error analyzing your video. Please try again.',
         });
       }
     });
   };
 
+  // --- NEECHE KA JSX (HTML) BILKUL SAME HAI ---
+  // --- Usmein koi badlaav nahi karna hai ---
   return (
-    // Aapka JSX (HTML) bilkul same rahega, usmein koi change nahi hai
     <div className="container mx-auto max-w-3xl">
       <Card>
         <CardHeader>

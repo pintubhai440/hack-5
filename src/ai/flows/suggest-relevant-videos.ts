@@ -22,9 +22,9 @@ const SuggestRelevantVideosInputSchema = z.object({
 export type SuggestRelevantVideosInput = z.infer<typeof SuggestRelevantVideosInputSchema>;
 
 const SuggestRelevantVideosOutputSchema = z.object({
-  videoSuggestions: z
-    .array(z.string())
-    .describe('A list of relevant exercise video URLs from external platforms.'),
+  searchQueries: z
+    .array(z.string())
+    .describe('A list of YouTube search queries, not URLs.'),
 });
 export type SuggestRelevantVideosOutput = z.infer<typeof SuggestRelevantVideosOutputSchema>;
 
@@ -38,12 +38,14 @@ const prompt = ai.definePrompt({
   name: 'suggestRelevantVideosPrompt',
   input: {schema: SuggestRelevantVideosInputSchema},
   output: {schema: SuggestRelevantVideosOutputSchema},
-  prompt: `You are an AI fitness assistant. Your task is to recommend relevant and valid YouTube videos based on a user's profile and fitness goals.
+  prompt: `You are an AI fitness assistant. Your task is to suggest relevant YouTube search topics based on a user's profile and fitness goals.
 
 User Profile: {{{userProfile}}}
 Fitness Goals: {{{fitnessGoals}}}
 
-Please provide a list of exactly 3 valid and relevant YouTube video URLs. You must verify that each URL leads to a real, active video on YouTube. Do not invent or hallucinate any URLs. The format must be 'https://www.youtube.com/watch?v=VIDEO_ID'.
+Please provide a list of exactly 3 concise and effective YouTube search queries.
+For example: 'best 10 min six pack workout' or 'beginner full body workout at home'.
+Do not provide URLs, only provide the search query text. Return the queries as an array of strings.
 `,
   config: {
     safetySettings: [

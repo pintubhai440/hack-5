@@ -1,137 +1,186 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-// YEH AAPKA BACKEND FUNCTION HAI
-import { suggestRelevantVideos } from '@/ai/flows/suggest-relevant-videos';
+import { useState, useRef, useTransition } from 'react';
+import { analyzeExerciseVideo } from '@/ai/flows/analyze-exercise-video';
 import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ExternalLinkIcon } from 'lucide-react';
+import { Loader2, Upload, CheckCircle, AlertTriangle } from 'lucide-react';
 
-// NAYA TYPE: Ab hum 'searchQueries' expect kar rahe hain, 'videoSuggestions' nahi
-type Recommendations = {
-  searchQueries: string[];
+type AnalysisResult = {
+  repetitionCount: number;
+  formFeedback?: string;
 };
 
-export default function RecommendationsPage() {
-  const [userProfile, setUserProfile] = useState('');
-  const [fitnessGoals, setFitnessGoals] = useState('');
-  // NAYA STATE: State ko naye type 'Recommendations' se update kiya
-  const [recommendations, setRecommendations] = useState<Recommendations | null>(null);
-  const [isPending, startTransition] = useTransition();
-  const { toast } = useToast();
+export default function AnalyzeVideoPage() {
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const [exerciseType, setExerciseType] = useState<string>('');
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
-  const handleGetRecommendations = () => {
-    if (!userProfile || !fitnessGoals) {
-      toast({
-        variant: 'destructive',
-        title: 'Missing information',
-        description: 'Please fill out your profile and fitness goals.',
-      });
-      return;
-    }
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 50 * 1024 * 1024) { // 50MB limit
+        toast({
+          variant: "destructive",
+          title: "File too large",
+          description: "Please upload a video smaller than 50MB.",
+        });
+        return;
+      }
+      setVideoFile(file);
+      setAnalysisResult(null);
 
-    startTransition(async () => {
-      try {
-        const result = await suggestRelevantVideos({
-          userProfile,
-          fitnessGoals,
-        });
-        // NAYA RESULT: Hum 'result' ko 'Recommendations' type mein set kar rahe hain
-        setRecommendations(result as Recommendations);
-      } catch (error) {
-        console.error('Failed to get recommendations:', error);
-        toast({
-          variant: 'destructive',
-          title: 'Failed to get recommendations',
-          description: 'There was an error. Please try again.',
-        });
-      }
-    });
-  };
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const videoElement = document.createElement('video');
+        videoElement.src = reader.result as string;
+        videoElement.onloadedmetadata = () => {
+          if (videoElement.duration > 45) {
+            toast({
+              variant: "destructive",
+              title: "Video too long",
+              description: "Please upload a video with a maximum duration of 45 seconds.",
+            });
+            setVideoFile(null);
+            setVideoPreview(null);
+            if(fileInputRef.current) fileInputRef.current.value = "";
+          } else {
+            setVideoPreview(reader.result as string);
+          }
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-  return (
-    // Is HTML/JSX mein koi badlaav nahi hai
-    <div className="container mx-auto max-w-3xl">
-      <Card>
-        <CardHeader>
-          <CardTitle>Get Recommendations</CardTitle>
-          <CardDescription>
-            Describe your profile and goals to get video recommendations.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-6">
-          <div className="grid gap-2">
-            <Textarea
-              placeholder="e.g., a 20 year old man, I want muscular body"
-              value={userProfile}
-              onChange={(e) => setUserProfile(e.target.value)}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Textarea
-              placeholder="e.g., six pack, muscular"
-              value={fitnessGoals}
-              onChange={(e) => setFitnessGoals(e.target.value)}
-            />
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button onClick={handleGetRecommendations} disabled={isPending}>
-            {isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Getting Recommendations...
-              </>
-            ) : (
-              'Get Recommendations'
-            )}
-          </Button>
-        </CardFooter>
-      </Card>
+  const handleAnalyze = () => {
+    if (!videoFile || !videoPreview || !exerciseType) {
+      toast({
+        variant: "destructive",
+        title: "Missing information",
+        description: "Please upload a video and select an exercise type.",
+      });
+      return;
+    }
 
-      {/* YEH HISSA BADAL GAYA HAI */}
-      {recommendations && (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Recommended For You</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-3">
-            {/* NAYA MAPPING: Ab hum 'videoSuggestions' ki jagah 'searchQueries' par loop kar rahe hain.
-              'video' variable ka naam 'query' ho gaya hai.
-            */}
-            {recommendations.searchQueries.map((query, index) => {
-              // NAYA LINK: Hum har query ke liye ek asli YouTube SEARCH link bana rahe hain
-              const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(
-                query
-              )}`;
+    startTransition(async () => {
+      try {
+        const result = await analyzeExerciseVideo({
+          videoDataUri: videoPreview,
+          exerciseType: exerciseType,
+        });
+        setAnalysisResult(result);
+      } catch (error) {
+        console.error("Analysis failed:", error);
+        toast({
+          variant: "destructive",
+          title: "Analysis Failed",
+          description: "There was an error analyzing your video. Please try again.",
+        });
+      }
+    });
+  };
 
-              return (
-                <a
-                  // NAYA URL: 'href' mein ab 'searchUrl' jaayega
-                  href={searchUrl}
-                  key={index}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between rounded-lg border bg-card p-3 transition-colors hover:bg-muted"
-                >
-                  {/* NAYA TEXT: Link ki jagah ab 'query' text dikhega */}
-                  <span className="truncate text-sm text-primary">{query}</span>
-                  <ExternalLinkIcon className="h-4 w-4 text-muted-foreground" />
-                </a>
-              );
-            })}
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
-} 
+  return (
+    <div className="container mx-auto max-w-3xl">
+      <Card>
+        <CardHeader>
+          <CardTitle>Analyze Exercise Video</CardTitle>
+          <CardDescription>
+            Upload a video (max 45 seconds) of your exercise to count reps and get form feedback.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-6">
+          <div className="grid gap-2">
+            <Label htmlFor="exercise-type">Exercise Type</Label>
+            <Select onValueChange={setExerciseType} value={exerciseType}>
+              <SelectTrigger id="exercise-type">
+                <SelectValue placeholder="Select an exercise" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Push-ups">Push-ups</SelectItem>
+                <SelectItem value="Squats">Squats</SelectItem>
+                <SelectItem value="Pull-ups">Pull-ups</SelectItem>
+                <SelectItem value="Lunges">Lunges</SelectItem>
+                <SelectItem value="Sit-ups">Sit-ups</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="video-upload">Video Upload</Label>
+            <Input id="video-upload" type="file" accept="video/*" onChange={handleFileChange} ref={fileInputRef} className="file:text-primary"/>
+          </div>
+
+          {videoPreview && (
+            <div className="mt-4">
+              <video
+                src={videoPreview}
+                controls
+                className="w-full rounded-lg"
+              ></video>
+            </div>
+          )}
+        </CardContent>
+        <CardFooter>
+          <Button onClick={handleAnalyze} disabled={isPending || !videoFile || !exerciseType}>
+            {isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Analyzing...
+              </>
+            ) : (
+              'Analyze Video'
+            )}
+          </Button>
+        </CardFooter>
+      </Card>
+
+      {analysisResult && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="text-green-500" />
+              Analysis Complete
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            <div className="flex items-baseline gap-4 rounded-lg bg-muted p-4">
+              <span className="text-sm font-medium text-muted-foreground">Repetition Count</span>
+              <span className="text-4xl font-bold text-primary">{analysisResult.repetitionCount}</span>
+            </div>
+            {analysisResult.formFeedback && (
+              <div>
+                <h4 className="font-semibold mb-2">Form Feedback</h4>
+                <div className="flex items-start gap-4 rounded-lg border bg-card p-4">
+                   <AlertTriangle className="h-5 w-5 text-amber-500 mt-1" />
+                   <p className="text-sm text-muted-foreground">{analysisResult.formFeedback}</p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}

@@ -14,9 +14,9 @@ import {
 } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ExternalLinkIcon } from 'lucide-react';
+import { Loader2, ExternalLinkIcon } from 'lucide-react'; // ExternalLinkIcon ko import karein
 
-// NAYA TYPE: Ab hum 'searchQueries' expect kar rahe hain, 'videoSuggestions' nahi
+// NAYA TYPE: Ab hum 'searchQueries' expect kar rahe hain
 type Recommendations = {
   searchQueries: string[];
 };
@@ -45,6 +45,10 @@ export default function RecommendationsPage() {
           userProfile,
           fitnessGoals,
         });
+        
+        // YEH NAYI LINE ADD KAREIN (Testing ke liye)
+        console.log("AI SE YEH RESULT AAYA:", result); 
+        
         // NAYA RESULT: Hum 'result' ko 'Recommendations' type mein set kar rahe hain
         setRecommendations(result as Recommendations);
       } catch (error) {
@@ -105,9 +109,7 @@ export default function RecommendationsPage() {
             <CardTitle>Recommended For You</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3">
-            {/* NAYA MAPPING: Ab hum 'videoSuggestions' ki jagah 'searchQueries' par loop kar rahe hain.
-              'video' variable ka naam 'query' ho gaya hai.
-            */}
+            {/* NAYA MAPPING: Ab hum 'searchQueries' par loop kar rahe hain */}
             {recommendations.searchQueries.map((query, index) => {
               // NAYA LINK: Hum har query ke liye ek asli YouTube SEARCH link bana rahe hain
               const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(

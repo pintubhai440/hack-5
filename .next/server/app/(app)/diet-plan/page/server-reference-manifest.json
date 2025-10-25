@@ -1,0 +1,16 @@
+{
+  "node": {
+    "40bcdafa178ff654c8e5ef54c863202e417199e4a0": {
+      "workers": {
+        "app/(app)/diet-plan/page": {
+          "moduleId": "[project]/.next-internal/server/app/(app)/diet-plan/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/ai/flows/generate-diet-plan.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(app)/diet-plan/page": "action-browser"
+      }
+    }
+  },
+  "edge": {}
+}

@@ -1,0 +1,46 @@
+{
+  "placeholderImages": [
+    {
+      "id": "dashboard-hero",
+      "description": "A person mid-workout, looking determined.",
+      "imageUrl": "https://images.unsplash.com/photo-1626440861753-eaba582d567f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxmaXRuZXNzJTIwd29ya291dHxlbnwwfHx8fDE3NjEzNjU0NjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fitness workout"
+    },
+    {
+      "id": "analyze-video-card",
+      "description": "An icon or abstract image representing video analysis.",
+      "imageUrl": "https://images.unsplash.com/photo-1654723011674-13e99382511d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx2aWRlbyUyMGFuYWx5c2lzfGVufDB8fHx8MTc2MTMyNDAwMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "video analysis"
+    },
+    {
+      "id": "live-session-card",
+      "description": "An image of a person exercising in front of a camera.",
+      "imageUrl": "https://images.unsplash.com/photo-1598890208253-b94e37923365?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxsaXZlJTIwd29ya291dHxlbnwwfHx8fDE3NjEzODMwMjh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "live workout"
+    },
+    {
+      "id": "diet-plan-card",
+      "description": "A vibrant photo of healthy food.",
+      "imageUrl": "https://images.unsplash.com/photo-1556386734-4227a180d19e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxoZWFsdGh5JTIwZm9vZHxlbnwwfHx8fDE3NjEzNDYxNTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "healthy food"
+    },
+    {
+      "id": "recommendations-card",
+      "description": "A person watching exercise videos on a laptop.",
+      "imageUrl": "https://images.unsplash.com/photo-1758599879065-46fd59235166?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxvbmxpbmUlMjBmaXRuZXNzfGVufDB8fHx8MTc2MTM4MzAyOHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "online fitness"
+    },
+    {
+      "id": "chatbot-card",
+      "description": "Abstract image representing AI and conversation.",
+      "imageUrl": "https://images.unsplash.com/photo-1712002641088-9d76f9080889?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhaSUyMGNoYXR8ZW58MHx8fHwxNzYxMzgzMDI4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ai chat"
+    },
+    {
+      "id": "profile-card",
+      "description": "A person setting their fitness goals on a device.",
+      "imageUrl": "https://images.unsplash.com/photo-1599577478756-8e795341c32d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxmaXRuZXNzJTIwZ29hbHN8ZW58MHx8fHwxNzYxMzgzMDI4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fitness goals"
+    }
+  ]
+}

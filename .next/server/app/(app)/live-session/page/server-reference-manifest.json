@@ -1,0 +1,16 @@
+{
+  "node": {
+    "408b9a0a77486225bc037b12102e973e5b81dbd6ce": {
+      "workers": {
+        "app/(app)/live-session/page": {
+          "moduleId": "[project]/.next-internal/server/app/(app)/live-session/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/ai/flows/analyze-exercise-video.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(app)/live-session/page": "action-browser"
+      }
+    }
+  },
+  "edge": {}
+}

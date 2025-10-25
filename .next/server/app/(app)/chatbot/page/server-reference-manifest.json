@@ -1,0 +1,16 @@
+{
+  "node": {
+    "40510b5a2b782d670a4f60882598c4a0a22748777d": {
+      "workers": {
+        "app/(app)/chatbot/page": {
+          "moduleId": "[project]/.next-internal/server/app/(app)/chatbot/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/ai/flows/answer-fitness-queries.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(app)/chatbot/page": "action-browser"
+      }
+    }
+  },
+  "edge": {}
+}

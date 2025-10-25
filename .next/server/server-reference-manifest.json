@@ -1,0 +1,39 @@
+{
+  "node": {
+    "40510b5a2b782d670a4f60882598c4a0a22748777d": {
+      "workers": {
+        "app/(app)/chatbot/page": {
+          "moduleId": "[project]/.next-internal/server/app/(app)/chatbot/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/ai/flows/answer-fitness-queries.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(app)/chatbot/page": "action-browser"
+      }
+    },
+    "408b9a0a77486225bc037b12102e973e5b81dbd6ce": {
+      "workers": {
+        "app/(app)/live-session/page": {
+          "moduleId": "[project]/.next-internal/server/app/(app)/live-session/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/ai/flows/analyze-exercise-video.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(app)/live-session/page": "action-browser"
+      }
+    },
+    "40b3f1d509dd253b02d266d7468209dbe8663769a3": {
+      "workers": {
+        "app/(app)/recommendations/page": {
+          "moduleId": "[project]/.next-internal/server/app/(app)/recommendations/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/ai/flows/suggest-relevant-videos.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(app)/recommendations/page": "action-browser"
+      }
+    }
+  },
+  "edge": {},
+  "encryptionKey": "YkTN1n6ioWVQLZb+vgifdGjr131DHKrVHMoNB2LDee4="
+}

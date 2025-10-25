@@ -1,0 +1,9 @@
+{
+  "/(app)/chatbot/page": "app/(app)/chatbot/page.js",
+  "/(app)/dashboard/page": "app/(app)/dashboard/page.js",
+  "/(app)/live-session/page": "app/(app)/live-session/page.js",
+  "/(app)/profile/page": "app/(app)/profile/page.js",
+  "/(app)/recommendations/page": "app/(app)/recommendations/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/page": "app/page.js"
+}

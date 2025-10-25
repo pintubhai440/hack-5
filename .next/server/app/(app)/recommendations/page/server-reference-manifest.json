@@ -1,0 +1,16 @@
+{
+  "node": {
+    "40b3f1d509dd253b02d266d7468209dbe8663769a3": {
+      "workers": {
+        "app/(app)/recommendations/page": {
+          "moduleId": "[project]/.next-internal/server/app/(app)/recommendations/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/ai/flows/suggest-relevant-videos.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(app)/recommendations/page": "action-browser"
+      }
+    }
+  },
+  "edge": {}
+}

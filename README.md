@@ -1,6 +1,7 @@
 https://hack-5-qmkgjt0sm-pintubhais-projects.vercel.app/dashboard
 
-# Firebase Studio
+# FitBe
+
 
 This is a NextJS starter in Firebase Studio.
 

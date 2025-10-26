@@ -5,7 +5,7 @@
  *
  * - generateDietPlan -  A function that generates a personalized 7-day diet plan.
  * - GenerateDietPlanInput - The input type for the generateDietPlan function.
- * - GenerateDietPlanOutput - The output type for the generateDietPlan function.
+ * - GenerateDietPlanOutput - The output type for the generateDietPlan output.
  */
 
 import {ai} from '@/ai/genkit';
@@ -21,10 +21,12 @@ const GenerateDietPlanInputSchema = z.object({
 
 export type GenerateDietPlanInput = z.infer<typeof GenerateDietPlanInputSchema>;
 
+// FIX: OutputSchema अब सिर्फ एक 'dietPlan' string expect करता है
 const GenerateDietPlanOutputSchema = z.object({
   dietPlan: z
     .string()
-    .describe('A personalized 7-day diet plan tailored to the user’s biography and fitness goals.'),
+    // FIX: Description में बताया गया है कि output सिर्फ एक simple Markdown string हो
+    .describe('A complete 7-day diet plan in well-formatted Markdown text, tailored to the user’s biography and fitness goals.'),
 });
 
 export type GenerateDietPlanOutput = z.infer<typeof GenerateDietPlanOutputSchema>;
@@ -39,12 +41,19 @@ const prompt = ai.definePrompt({
   name: 'generateDietPlanPrompt',
   input: {schema: GenerateDietPlanInputSchema},
   output: {schema: GenerateDietPlanOutputSchema},
-  prompt: `You are a certified nutritionist. Generate a personalized 7-day diet plan based on the user's biography and fitness goals.
+  // FIX: Prompt को सख्त बनाया गया है कि वह सिर्फ Markdown Text दे, JSON format नहीं
+  prompt: `You are a certified nutritionist. Generate a personalized, detailed, and comprehensive 7-day diet plan based on the user's biography and fitness goals.
 
 User Biography: {{{biography}}}
 Fitness Goals: {{{fitnessGoals}}}
 
-Diet Plan:`,
+**Instructions for Output:**
+1. Generate the complete 7-day diet plan (Day 1 to Day 7).
+2. For each day, include meals for Breakfast, Lunch, Dinner, and 1-2 Snacks.
+3. Your entire response must be returned as a single JSON object matching the schema. The content of the 'dietPlan' field MUST be a single string containing the entire plan, clearly formatted using **Markdown headings and lists**.
+4. Do NOT include any extra text outside the final JSON block.
+
+Diet Plan Content (Use Markdown):`,
 });
 
 const generateDietPlanFlow = ai.defineFlow(

@@ -1,155 +1,177 @@
-'use client';
+'use client'; 
 
-import { useTransition, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import React, { useState, useTransition } from 'react';
+
+// YEH AAPKA BACKEND FUNCTION HAI
 import { suggestRelevantVideos } from '@/ai/flows/suggest-relevant-videos';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Form,
-FormControl,
-FormDescription,
-FormField,
-FormItem,
-FormLabel,
-FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { Loader2, Youtube, ExternalLink } from 'lucide-react';
-import Link from 'next/link';
 
-const formSchema = z.object({
-  userProfile: z.string().min(20, 'Please provide more details for better recommendations.'),
-  fitnessGoals: z.string().min(10, 'Please describe your goals in more detail.'),
-});
+// Hum Toast (popup) aur Icons ke liye yeh import kar rahe hain
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, ExternalLinkIcon } from 'lucide-react';
+
+// NAYA TYPE: Jaisa aapke AI code mein tha
+type Recommendations = {
+  searchQueries: string[];
+};
+
+// Yeh icon (SVG) hai jo pehle code mein tha
+const ExternalLinkIconSvg = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className="w-5 h-5 text-gray-500 hover:text-blue-600"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+    />
+  </svg>
+);
 
 export default function RecommendationsPage() {
+  // State variables (AI code se)
+  const [userProfile, setUserProfile] = useState('20 year old man');
+  const [fitnessGoals, setFitnessGoals] = useState('muscular');
+  const [recommendations, setRecommendations] = useState<Recommendations | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [videoSuggestions, setVideoSuggestions] = useState<string[] | null>(null);
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      userProfile: 'e.g., 30-year-old male, beginner fitness level, has access to dumbbells.',
-      fitnessGoals: 'e.g., Build chest and shoulder strength.',
-    },
-  });
+  // AI ko call karne wala function (AI code se)
+  const handleGetRecommendations = (e: React.FormEvent) => {
+    e.preventDefault(); // Page ko reload hone se rokta hai
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!userProfile || !fitnessGoals) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing information',
+        description: 'Please fill out your profile and fitness goals.',
+      });
+      return;
+    }
+
     startTransition(async () => {
       try {
-        const result = await suggestRelevantVideos(values);
-        setVideoSuggestions(result.videoSuggestions);
+        const result = await suggestRelevantVideos({
+          userProfile,
+          fitnessGoals,
+        });
+        
+        console.log("AI SE YEH RESULT AAYA:", result); 
+        
+        setRecommendations(result as Recommendations);
       } catch (error) {
         console.error('Failed to get recommendations:', error);
         toast({
           variant: 'destructive',
-          title: 'Suggestion Failed',
-          description: 'Could not get video recommendations. Please try again.',
+          title: 'Failed to get recommendations',
+          description: 'There was an error. Please try again.',
         });
       }
     });
-  }
+  };
 
   return (
-    <div className="container mx-auto max-w-3xl space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>AI Video Recommendations</CardTitle>
-          <CardDescription>
-            Get personalized exercise video recommendations from YouTube based on your profile and goals.
-          </CardDescription>
-        </CardHeader>
-        <Form {...form}>
-          <form onSubmit={form. handleSubmit(onSubmit)}>
-            <CardContent className="space-y-4">
-              <FormField
-                control={form.control}
-                name="userProfile"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Your Profile</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Tell us about yourself..." rows={3} {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Include age, fitness level, and available equipment.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="fitnessGoals"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fitness Goals</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Improve cardio, build leg strength" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      What do you want to work on?
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-            <CardFooter>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Finding Videos...
-                  </>
-                ) : (
-                  'Get Recommendations'
-                )}
-              </Button>
-            </CardFooter>
-          </form>
-        </Form>
-      </Card>
+    // Main content area (Screenshot wale code se)
+    <div className="flex-1 p-8 bg-sky-50 min-h-screen overflow-y-auto">
+      
+      <div className="max-w-3xl">
 
-      {videoSuggestions && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Youtube className="text-red-500" />
+        {/* --- Get Recommendations Section (Screenshot wale code se) --- */}
+        <div className="mb-8">
+          <h2 className="text-3xl font-semibold mb-2 text-gray-800">
+            Get Recommendations
+          </h2>
+          <p className="text-gray-600 mb-4">
+            Describe your profile and goals to get video recommendations.
+          </p>
+          
+          {/* Form aur button (AI function ke saath merged) */}
+          <form onSubmit={handleGetRecommendations} className="space-y-4">
+            {/* Textarea 1 */}
+            <textarea
+              className="w-full p-4 border-0 rounded-lg bg-sky-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+              rows="3"
+              value={userProfile}
+              onChange={(e) => setUserProfile(e.target.value)}
+              placeholder="e.g., 20 year old man"
+            ></textarea>
+            
+            {/* Textarea 2 */}
+            <textarea
+              className="w-full p-4 border-0 rounded-lg bg-sky-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+              rows="3"
+              value={fitnessGoals}
+              onChange={(e) => setFitnessGoals(e.target.value)}
+              placeholder="e.g., muscular, weight loss"
+            ></textarea>
+            
+            {/* Button (Loading state ke saath merged) */}
+            <button
+              type="submit"
+              className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50"
+              disabled={isPending}
+            >
+              {isPending ? (
+                <span className="flex items-center">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Getting...
+                </span>
+              ) : (
+                'Get Recommendations'
+              )}
+            </button>
+          </form>
+        </div>
+
+        {/* --- Recommended For You Section (AI data ke saath merged) --- */}
+        {recommendations && (
+          <div>
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">
               Recommended For You
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3">
-              {videoSuggestions.map((url, index) => (
-                <li key={index}>
-                  <Link href={url} target="_blank" rel="noopener noreferrer">
-                    <Card className="hover:bg-muted/50 transition-colors">
-                      <CardContent className="p-4 flex items-center justify-between">
-                        <span className="truncate text-sm text-primary underline-offset-4 hover:underline">{url}</span>
-                        <ExternalLink className="h-4 w-4 text-muted-foreground ml-4 shrink-0" />
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
+            </h2>
+            <div className="space-y-3">
+              
+              {/* NAYA MAPPING: Ab hum AI se aaye 'searchQueries' par loop kar rahe hain */}
+              {recommendations.searchQueries.map((query, index) => {
+                // Har query ke liye YouTube search link banaya
+                const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+
+                return (
+                  <div
+                    key={index}
+                    // Screenshot wala white card style
+                    className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex justify-between items-center"
+                  >
+                    {/* Link (AI query text ke saath) */}
+                    <a
+                      href={searchUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline font-medium capitalize text-sm"
+                    >
+                      {query}
+                    </a>
+                    {/* Icon */}
+                    <a
+                      href={searchUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-4 flex-shrink-0"
+                    >
+                      <ExternalLinkIconSvg />
+                    </a>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+      </div>
     </div>
   );
 }

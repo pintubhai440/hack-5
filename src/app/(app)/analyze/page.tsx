@@ -1,9 +1,7 @@
-// File: app/analyze/page.tsx
-
 'use client';
 
 import { useState, useRef, useTransition } from 'react';
-// import { analyzeExerciseVideo } from '@/ai/flows/analyze-exercise-video'; // <-- Ise HATA dein
+import { analyzeExerciseVideo } from '@/ai/flows/analyze-exercise-video';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -23,7 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Loader2, Upload, CheckCircle, AlertTriangle } from 'lucide-react';
 
 type AnalysisResult = {
   repetitionCount: number;
@@ -34,9 +32,7 @@ export default function AnalyzeVideoPage() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const [exerciseType, setExerciseType] = useState<string>('');
-  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(
-    null
-  );
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [isPending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -46,89 +42,66 @@ export default function AnalyzeVideoPage() {
     if (file) {
       if (file.size > 50 * 1024 * 1024) { // 50MB limit
         toast({
-          variant: 'destructive',
-          title: 'File too large',
-          description: 'Please upload a video smaller than 50MB.',
+          variant: "destructive",
+          title: "File too large",
+          description: "Please upload a video smaller than 50MB.",
         });
         return;
       }
+      setVideoFile(file);
+      setAnalysisResult(null);
 
-      setAnalysisResult(null); 
-
-      const videoElement = document.createElement('video');
-      videoElement.preload = 'metadata';
-
-      videoElement.onloadedmetadata = () => {
-        window.URL.revokeObjectURL(videoElement.src); 
-        if (videoElement.duration > 45) {
-          toast({
-            variant: 'destructive',
-            title: 'Video too long',
-            description: 'Please upload a video with a maximum duration of 45 seconds.',
-          });
-          setVideoFile(null);
-          setVideoPreview(null);
-          if (fileInputRef.current) fileInputRef.current.value = '';
-        } else {
-          setVideoFile(file);
-          if (videoPreview) {
-            URL.revokeObjectURL(videoPreview);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const videoElement = document.createElement('video');
+        videoElement.src = reader.result as string;
+        videoElement.onloadedmetadata = () => {
+          if (videoElement.duration > 45) {
+            toast({
+              variant: "destructive",
+              title: "Video too long",
+              description: "Please upload a video with a maximum duration of 45 seconds.",
+            });
+            setVideoFile(null);
+            setVideoPreview(null);
+            if(fileInputRef.current) fileInputRef.current.value = "";
+          } else {
+            setVideoPreview(reader.result as string);
           }
-          setVideoPreview(URL.createObjectURL(file)); 
-        }
+        };
       };
-      
-      videoElement.src = URL.createObjectURL(file);
+      reader.readAsDataURL(file);
     }
   };
 
-  // *** YEH FUNCTION POORA BADAL GAYA HAI ***
   const handleAnalyze = () => {
-    if (!videoFile || !exerciseType) {
+    if (!videoFile || !videoPreview || !exerciseType) {
       toast({
-        variant: 'destructive',
-        title: 'Missing information',
-        description: 'Please upload a video and select an exercise type.',
+        variant: "destructive",
+        title: "Missing information",
+        description: "Please upload a video and select an exercise type.",
       });
       return;
     }
 
     startTransition(async () => {
       try {
-        // Step 1: Naya FormData "parcel" banayein
-        const formData = new FormData();
-        formData.append('videoFile', videoFile);
-        formData.append('exerciseType', exerciseType);
-
-        // Step 2: Server action ki jagah naye API route ko FETCH karein
-        const response = await fetch('/api/analyze-video', {
-          method: 'POST',
-          body: formData,
+        const result = await analyzeExerciseVideo({
+          videoDataUri: videoPreview,
+          exerciseType: exerciseType,
         });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          // Agar server ne error bheja, toh use dikhayein
-          throw new Error(result.error || 'Unknown error');
-        }
-        
-        // Step 3: Result ko state mein set karein
-        setAnalysisResult(result as AnalysisResult);
-
+        setAnalysisResult(result);
       } catch (error) {
-        console.error('Analysis failed:', error);
+        console.error("Analysis failed:", error);
         toast({
-          variant: 'destructive',
-          title: 'Analysis Failed',
-          description: (error as Error).message || 'There was an error analyzing your video. Please try again.',
+          variant: "destructive",
+          title: "Analysis Failed",
+          description: "There was an error analyzing your video. Please try again.",
         });
       }
     });
   };
 
-  // --- NEECHE KA JSX (HTML) BILKUL SAME HAI ---
-  // --- Usmein koi badlaav nahi karna hai ---
   return (
     <div className="container mx-auto max-w-3xl">
       <Card>
@@ -200,8 +173,8 @@ export default function AnalyzeVideoPage() {
               <div>
                 <h4 className="font-semibold mb-2">Form Feedback</h4>
                 <div className="flex items-start gap-4 rounded-lg border bg-card p-4">
-                    <AlertTriangle className="h-5 w-5 text-amber-500 mt-1" />
-                    <p className="text-sm text-muted-foreground">{analysisResult.formFeedback}</p>
+                   <AlertTriangle className="h-5 w-5 text-amber-500 mt-1" />
+                   <p className="text-sm text-muted-foreground">{analysisResult.formFeedback}</p>
                 </div>
               </div>
             )}

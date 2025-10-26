@@ -1,4 +1,4 @@
-hack-5-qmkgjt0sm-pintubhais-projects.vercel.app
+https://hack-5-qmkgjt0sm-pintubhais-projects.vercel.app/dashboard
 
 # Firebase Studio
 
